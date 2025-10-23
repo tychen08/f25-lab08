@@ -16,15 +16,18 @@ public class SimpleQueueTest {
     @Test
     public void testSize() {
         SimpleQueue<Integer> q = makeEmptyQueue();
-        Thread t1 = new Thread(new Producer(q, 100000));
-        Thread t2 = new Thread(new Producer(q, 100000));
-        Thread t3 = new Thread(new SpinWaitConsumer(q, 200000));
+        // Producer implements Runnable, which is an input to a Thread
+        // to specify which code to run in that thread.
+        Thread t1 = new Thread(new Producer(q, 100000)); // enqueue 100,000 items
+        Thread t2 = new Thread(new Producer(q, 100000)); 
+        Thread t3 = new Thread(new SpinWaitConsumer(q, 200000)); // if queue is nonempty, dequeue 200,000 items
 
         t1.start();
         t2.start();
         t3.start();
 
         try {
+            // collect all threads when done
             t1.join();
             t2.join();
             t3.join();
@@ -53,7 +56,7 @@ public class SimpleQueueTest {
     @Test
     public void testQueueBlocking() {
         SimpleQueue<Integer> q = new UnboundedBlockingQueue<Integer>();
-        Thread t1 = new Thread(new Producer(q, 200000));
+        Thread t1 = new Thread(new Producer(q, 200000)); // enqueue 200,000 items
         Thread t2 = new Thread(new Consumer(q, 100000));
         Thread t3 = new Thread(new Consumer(q, 100000));
 
