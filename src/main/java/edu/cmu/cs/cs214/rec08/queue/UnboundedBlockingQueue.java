@@ -22,14 +22,30 @@ public class UnboundedBlockingQueue<E> implements SimpleQueue<E> {
 
     public E peek() { return queue.peek(); }
 
-    public void enqueue(E element) { queue.add(element); }
+    public void enqueue(E element) { 
+        synchronized(this) {
+            queue.add(element); 
+            this.notifyAll();
+        }
+    }
 
     /**
      * TODO:  Change this method to block (waiting for an enqueue) rather
      * than throw an exception.  Completing this task may require
      * modifying other methods.
      */
-    public E dequeue() { return queue.remove(); }
+    public E dequeue() { 
+        synchronized(this) {
+            while (queue.isEmpty()) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // restore interrupt status
+                }
+            }
+            return queue.remove(); 
+        }
+    }
 
     public String toString() { return queue.toString(); }
 }
